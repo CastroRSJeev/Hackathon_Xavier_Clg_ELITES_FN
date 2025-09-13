@@ -12,11 +12,11 @@ export async function POST(req) {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
-      You are an AI study assistant. 
-      Help students by simplifying complex topics, 
-      focusing only on the most important concepts, and 
+      You are an AI study assistant.
+      Help students by simplifying complex topics,
+      focusing only on the most important concepts, and
       providing clear, concise explanations.
-      
+
       Student asked: ${question}
     `;
 

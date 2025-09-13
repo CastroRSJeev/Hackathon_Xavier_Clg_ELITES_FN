@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, Download, Search, X, Save, FileText, Calendar, User, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, ExternalLink, Search, X, Save, FileText, Calendar, User, Link } from 'lucide-react';
 
 const StudyMaterialsCRUD = () => {
   const [materials, setMaterials] = useState([]);
@@ -8,62 +8,24 @@ const StudyMaterialsCRUD = () => {
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('view'); // 'view', 'create', 'edit'
-  const [selectedFile, setSelectedFile] = useState(null);
   const [formData, setFormData] = useState({
     materialName: '',
     materialDescription: '',
     userId: '68c515c79d7e6426d6777f59',
-    studyMaterialDocument: null
+    studyMaterialLink: ''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   const API_BASE = 'http://localhost:5000/api/study-materials';
 
-  // Helper function to log FormData contents
-  const logFormData = (formDataObj, title) => {
-    console.log(`=== ${title} ===`);
-    for (let [key, value] of formDataObj.entries()) {
-      if (value instanceof File) {
-        console.log(`${key}:`, {
-          name: value.name,
-          size: value.size,
-          type: value.type,
-          lastModified: value.lastModified
-        });
-      } else {
-        console.log(`${key}:`, value);
-      }
-    }
-    console.log('==================');
-  };
-
-  // File handler function
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Validate file type and size
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      
-      if (!allowedTypes.includes(file.type)) {
-        setError('Please select a valid file type (PDF, DOC, DOCX)');
-        return;
-      }
-      
-      if (file.size > maxSize) {
-        setError('File size must be less than 10MB');
-        return;
-      }
-      
-      console.log('=== Selected File Details ===');
-      console.log('File name:', file.name);
-      console.log('File size:', file.size, 'bytes');
-      console.log('File type:', file.type);
-      console.log('============================');
-      
-      setSelectedFile(file);
-      setFormData({...formData, studyMaterialDocument: file});
+  // Validate URL format
+  const isValidUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch (_) {
+      return false;
     }
   };
 
@@ -85,145 +47,102 @@ const StudyMaterialsCRUD = () => {
     fetchMaterials();
   }, []);
 
-  // Create material with file upload
+  // Create material
   const createMaterial = async () => {
     try {
-      let payload;
-      let headers = {};
-
-      console.log('=== CREATE MATERIAL REQUEST ===');
-      console.log('Form Data State:', formData);
-      console.log('Selected File:', selectedFile);
-
-      if (selectedFile) {
-        // Use FormData for file upload
-        const formDataPayload = new FormData();
-        formDataPayload.append('userId', formData.userId);
-        formDataPayload.append('materialName', formData.materialName);
-        formDataPayload.append('materialDescription', formData.materialDescription);
-        formDataPayload.append('studyMaterialDocument', selectedFile);
-        
-        // Log FormData contents
-        logFormData(formDataPayload, 'CREATE REQUEST - FormData Payload');
-        
-        payload = formDataPayload;
-        // Don't set Content-Type for FormData, let browser set it with boundary
-      } else {
-        // Use JSON for data without file
-        const jsonPayload = {
-          userId: "68c515c79d7e6426d6777f59",
-          materialName: formData.materialName,
-          materialDescription: formData.materialDescription,
-          studyMaterialDocument: null
-        };
-        
-        console.log('=== CREATE REQUEST - JSON Payload ===');
-        console.log(JSON.stringify(jsonPayload, null, 2));
-        console.log('=====================================');
-        
-        payload = JSON.stringify(jsonPayload);
-        headers['Content-Type'] = 'application/json';
+      // Validate required fields
+      if (!formData.materialName.trim() || !formData.materialDescription.trim()) {
+        setError('Material name and description are required');
+        return;
       }
 
-      console.log('Request Headers:', headers);
-      console.log('Request URL:', API_BASE);
-      console.log('Request Method: POST');
-      console.log('===============================');
+      // Validate URL if provided
+      if (formData.studyMaterialLink && !isValidUrl(formData.studyMaterialLink)) {
+        setError('Please enter a valid URL');
+        return;
+      }
+
+      console.log('=== CREATE MATERIAL REQUEST ===');
+      console.log('Form Data:', formData);
+
+      const payload = {
+        userId: formData.userId,
+        materialName: formData.materialName.trim(),
+        materialDescription: formData.materialDescription.trim(),
+        studyMaterialLink: formData.studyMaterialLink.trim() || null
+      };
+
+      console.log('Request Payload:', payload);
 
       const response = await fetch(API_BASE, {
         method: 'POST',
-        headers: headers,
-        body: payload
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) throw new Error('Failed to create material');
       
       const responseData = await response.json();
-      console.log('=== CREATE RESPONSE ===');
-      console.log('Response Status:', response.status);
-      console.log('Response Data:', responseData);
-      console.log('======================');
+      console.log('Response:', responseData);
       
       setSuccess('Material created successfully!');
       fetchMaterials();
       closeModal();
     } catch (err) {
-      console.error('=== CREATE ERROR ===');
-      console.error('Error:', err);
-      console.error('====================');
+      console.error('Create Error:', err);
       setError('Failed to create material');
     }
   };
 
-  // Update material with file upload (includes ID in PUT request)
+  // Update material
   const updateMaterial = async () => {
     try {
-      let payload;
-      let headers = {};
+      // Validate required fields
+      if (!formData.materialName.trim() || !formData.materialDescription.trim()) {
+        setError('Material name and description are required');
+        return;
+      }
+
+      // Validate URL if provided
+      if (formData.studyMaterialLink && !isValidUrl(formData.studyMaterialLink)) {
+        setError('Please enter a valid URL');
+        return;
+      }
 
       console.log('=== UPDATE MATERIAL REQUEST ===');
       console.log('Material ID:', selectedMaterial._id);
-      console.log('Form Data State:', formData);
-      console.log('Selected File:', selectedFile);
+      console.log('Form Data:', formData);
 
-      if (selectedFile) {
-        // Use FormData for file upload
-        const formDataPayload = new FormData();
-        formDataPayload.append('id', selectedMaterial._id); // Add ID for PUT request
-        formDataPayload.append('userId', formData.userId);
-        formDataPayload.append('materialName', formData.materialName);
-        formDataPayload.append('materialDescription', formData.materialDescription);
-        formDataPayload.append('studyMaterialDocument', selectedFile);
-        
-        // Log FormData contents
-        logFormData(formDataPayload, 'UPDATE REQUEST - FormData Payload');
-        
-        payload = formDataPayload;
-        // Don't set Content-Type for FormData
-      } else {
-        // Use JSON for data without file
-        const jsonPayload = {
-          id: selectedMaterial._id, // Include ID in PUT request
-          userId: "68c515c79d7e6426d6777f59",
-          materialName: formData.materialName,
-          materialDescription: formData.materialDescription,
-          studyMaterialDocument: formData.studyMaterialDocument || null
-        };
-        
-        console.log('=== UPDATE REQUEST - JSON Payload ===');
-        console.log(JSON.stringify(jsonPayload, null, 2));
-        console.log('=====================================');
-        
-        payload = JSON.stringify(jsonPayload);
-        headers['Content-Type'] = 'application/json';
-      }
+      const payload = {
+        id: selectedMaterial._id,
+        userId: formData.userId,
+        materialName: formData.materialName.trim(),
+        materialDescription: formData.materialDescription.trim(),
+        studyMaterialLink: formData.studyMaterialLink.trim() || null
+      };
 
-      console.log('Request Headers:', headers);
-      console.log('Request URL:', `${API_BASE}/${selectedMaterial._id}`);
-      console.log('Request Method: PUT');
-      console.log('===============================');
+      console.log('Request Payload:', payload);
 
       const response = await fetch(`${API_BASE}/${selectedMaterial._id}`, {
         method: 'PUT',
-        headers: headers,
-        body: payload
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) throw new Error('Failed to update material');
       
       const responseData = await response.json();
-      console.log('=== UPDATE RESPONSE ===');
-      console.log('Response Status:', response.status);
-      console.log('Response Data:', responseData);
-      console.log('======================');
+      console.log('Response:', responseData);
       
       setSuccess('Material updated successfully!');
       fetchMaterials();
       closeModal();
     } catch (err) {
-      console.error('=== UPDATE ERROR ===');
-      console.error('Error:', err);
-      console.error('====================');
+      console.error('Update Error:', err);
       setError('Failed to update material');
     }
   };
@@ -234,24 +153,17 @@ const StudyMaterialsCRUD = () => {
     try {
       console.log('=== DELETE REQUEST ===');
       console.log('Material ID:', id);
-      console.log('Request URL:', `${API_BASE}/${id}`);
-      console.log('Request Method: DELETE');
-      console.log('=====================');
 
       const response = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
       
       if (!response.ok) throw new Error('Failed to delete material');
       
-      console.log('=== DELETE RESPONSE ===');
-      console.log('Response Status:', response.status);
-      console.log('======================');
+      console.log('Delete successful');
       
       setSuccess('Material deleted successfully!');
       fetchMaterials();
     } catch (err) {
-      console.error('=== DELETE ERROR ===');
-      console.error('Error:', err);
-      console.error('====================');
+      console.error('Delete Error:', err);
       setError('Failed to delete material');
     }
   };
@@ -261,7 +173,6 @@ const StudyMaterialsCRUD = () => {
     console.log('=== OPENING MODAL ===');
     console.log('Mode:', mode);
     console.log('Material:', material);
-    console.log('====================');
     
     setModalMode(mode);
     setSelectedMaterial(material);
@@ -269,41 +180,38 @@ const StudyMaterialsCRUD = () => {
       setFormData({ 
         materialName: '', 
         materialDescription: '', 
-        userId: '',
-        studyMaterialDocument: null 
+        userId: '68c515c79d7e6426d6777f59',
+        studyMaterialLink: ''
       });
-      setSelectedFile(null);
     } else if (mode === 'edit' && material) {
       setFormData({
         materialName: material.materialName,
         materialDescription: material.materialDescription,
         userId: material.userId,
-        studyMaterialDocument: material.studyMaterialDocument
+        studyMaterialLink: material.studyMaterialLink || ''
       });
-      setSelectedFile(null);
     }
     setIsModalOpen(true);
+    setError('');
   };
 
   const closeModal = () => {
     console.log('=== CLOSING MODAL ===');
     setIsModalOpen(false);
     setSelectedMaterial(null);
-    setSelectedFile(null);
     setFormData({ 
       materialName: '', 
       materialDescription: '', 
-      userId: '',
-      studyMaterialDocument: null 
+      userId: '68c515c79d7e6426d6777f59',
+      studyMaterialLink: ''
     });
+    setError('');
   };
 
   const handleSubmit = () => {
     console.log('=== FORM SUBMISSION ===');
     console.log('Modal Mode:', modalMode);
     console.log('Current Form Data:', formData);
-    console.log('Selected File:', selectedFile);
-    console.log('======================');
     
     if (modalMode === 'create') {
       createMaterial();
@@ -312,19 +220,14 @@ const StudyMaterialsCRUD = () => {
     }
   };
 
-  // Download handler
-  const handleDownload = (material) => {
-    console.log('=== DOWNLOAD REQUEST ===');
+  // Open link handler
+  const handleOpenLink = (material) => {
+    console.log('=== OPEN LINK REQUEST ===');
     console.log('Material:', material);
-    console.log('Document URL:', material.studyMaterialDocument);
-    console.log('=======================');
+    console.log('Link URL:', material.studyMaterialLink);
     
-    if (material.studyMaterialDocument) {
-      // Simulate download - in real app, this would be the actual document URL
-      const link = document.createElement('a');
-      link.href = material.studyMaterialDocument;
-      link.download = `${material.materialName}.pdf`;
-      link.click();
+    if (material.studyMaterialLink) {
+      window.open(material.studyMaterialLink, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -409,9 +312,9 @@ const StudyMaterialsCRUD = () => {
                   <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">
                     {material.materialName}
                   </h3>
-                  {material.studyMaterialDocument && (
+                  {material.studyMaterialLink && (
                     <div className="flex-shrink-0 ml-2">
-                      <FileText className="text-blue-600" size={20} />
+                      <Link className="text-blue-600" size={20} />
                     </div>
                   )}
                 </div>
@@ -450,13 +353,13 @@ const StudyMaterialsCRUD = () => {
                     </button>
                   </div>
 
-                  {material.studyMaterialDocument && (
+                  {material.studyMaterialLink && (
                     <button
-                      onClick={() => handleDownload(material)}
+                      onClick={() => handleOpenLink(material)}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg flex items-center gap-1 text-sm transition-colors"
                     >
-                      <Download size={14} />
-                      Download
+                      <ExternalLink size={14} />
+                      Open Link
                     </button>
                   )}
                 </div>
@@ -539,21 +442,25 @@ const StudyMaterialsCRUD = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Document Status</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Study Material Link</label>
                     <div className={`p-3 rounded-lg flex items-center justify-between ${
-                      selectedMaterial.studyMaterialDocument ? 'bg-green-50 text-green-800' : 'bg-gray-50 text-gray-600'
+                      selectedMaterial.studyMaterialLink ? 'bg-green-50 text-green-800' : 'bg-gray-50 text-gray-600'
                     }`}>
                       <div className="flex items-center">
-                        <FileText size={16} className="mr-2" />
-                        {selectedMaterial.studyMaterialDocument ? 'Document Available' : 'No Document'}
+                        <Link size={16} className="mr-2" />
+                        {selectedMaterial.studyMaterialLink ? (
+                          <span className="break-all">{selectedMaterial.studyMaterialLink}</span>
+                        ) : (
+                          'No Link Provided'
+                        )}
                       </div>
-                      {selectedMaterial.studyMaterialDocument && (
+                      {selectedMaterial.studyMaterialLink && (
                         <button
-                          onClick={() => handleDownload(selectedMaterial)}
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center gap-1 text-sm"
+                          onClick={() => handleOpenLink(selectedMaterial)}
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center gap-1 text-sm ml-2 flex-shrink-0"
                         >
-                          <Download size={14} />
-                          Download
+                          <ExternalLink size={14} />
+                          Open
                         </button>
                       )}
                     </div>
@@ -589,53 +496,23 @@ const StudyMaterialsCRUD = () => {
                     />
                   </div>
 
-                 
-
-                  {/* File Upload Section */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Study Material Document (Optional)
+                      Study Material Link (Optional)
                     </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
-                      {selectedFile ? (
-                        <div className="space-y-3">
-                          <FileText className="mx-auto h-8 w-8 text-blue-600" />
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
-                            <p className="text-xs text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedFile(null);
-                              setFormData({...formData, studyMaterialDocument: null});
-                              document.getElementById('file-upload').value = '';
-                            }}
-                            className="text-red-600 hover:text-red-700 text-sm"
-                          >
-                            Remove file
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          <Upload className="mx-auto h-8 w-8 text-gray-400" />
-                          <div>
-                            <label htmlFor="file-upload" className="cursor-pointer">
-                              <span className="text-blue-600 hover:text-blue-700 font-medium">Click to upload</span>
-                              <span className="text-gray-500"> or drag and drop</span>
-                            </label>
-                            <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX up to 10MB</p>
-                          </div>
-                        </div>
-                      )}
+                    <div className="relative">
+                      <Link className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
                       <input
-                        id="file-upload"
-                        type="file"
-                        className="hidden"
-                        accept=".pdf,.doc,.docx"
-                        onChange={handleFileChange}
+                        type="url"
+                        value={formData.studyMaterialLink}
+                        onChange={(e) => setFormData({...formData, studyMaterialLink: e.target.value})}
+                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="https://example.com/document.pdf"
                       />
                     </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Enter a direct link to your study material (Google Drive, Dropbox, website, etc.)
+                    </p>
                   </div>
                 </div>
               )}

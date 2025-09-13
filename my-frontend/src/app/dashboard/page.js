@@ -1,47 +1,65 @@
 "use client";
 
-import { useAuth } from "../../context/AuthContext";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { logout } from "../Services/AuthService";
 
-export default function Dashboard() {
-  const { user, logout } = useAuth();
+export default function DashboardPage() {
+  const [user, setUser] = useState(null);
   const router = useRouter();
 
-  // Redirect to login if no user
+  // Load user from localStorage
   useEffect(() => {
-    if (!user) router.push("/");
-  }, [user, router]);
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    } else {
+      // If no user found, redirect to auth page
+      router.push("/auth");
+    }
+  }, [router]);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/auth");
+  };
 
   if (!user) {
-    // Optionally, return a loading state
-    return <p>Loading...</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white rounded-xl shadow-lg p-8 max-w-sm w-full">
-        <h2 className="text-2xl font-bold mb-6 text-blue-700 text-center">User Dashboard</h2>
-        <div className="space-y-3">
-          <div>
-            <span className="font-semibold">Name:</span> {user.name}
-          </div>
-          <div>
-            <span className="font-semibold">Email:</span> {user.email}
-          </div>
-          <div>
-            <span className="font-semibold">Department:</span> {user.department}
-          </div>
-          <div>
-            <span className="font-semibold">Role:</span> {user.role}
-          </div>
-          <div>
-            <span className="font-semibold">ID:</span> {user.id}
-          </div>
+    <div className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
+        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+
+        <div className="mb-6">
+          <p>
+            <strong>Name:</strong> {user.name}
+          </p>
+          <p>
+            <strong>Email:</strong> {user.email}
+          </p>
+          <p>
+            <strong>Role:</strong> {user.role || "N/A"}
+          </p>
+          <p>
+            <strong>Department:</strong> {user.department || "N/A"}
+          </p>
+          {user.id && (
+            <p>
+              <strong>ID:</strong> {user.id}
+            </p>
+          )}
         </div>
+
         <button
-          className="mt-8 w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
-          onClick={logout}
+          onClick={handleLogout}
+          className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
         >
           Logout
         </button>

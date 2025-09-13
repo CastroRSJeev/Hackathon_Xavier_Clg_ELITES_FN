@@ -457,19 +457,6 @@ const StudentProgressTracker = () => {
                   className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <select
-                  value={newTask.subject}
-                  onChange={(e) =>
-                    setNewTask({ ...newTask, subject: e.target.value })
-                  }
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {subjects.map((subject) => (
-                    <option key={subject.code} value={subject.name}>
-                      {subject.name}
-                    </option>
-                  ))}
-                </select>
-                <select
                   value={newTask.status}
                   onChange={(e) =>
                     setNewTask({ ...newTask, status: e.target.value })

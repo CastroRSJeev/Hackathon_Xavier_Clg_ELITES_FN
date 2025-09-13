@@ -23,9 +23,10 @@ import {
 } from "lucide-react";
 import DashTasks from "@/components/DashTasks";
 import AIStudyAssistant from "@/components/AIStudyAssistant";
+import AIStudyAssistantCard from "@/components/AssistantCard";
 
 // Lazy load components for better performance
-const TasksComponent = lazy(() => import("@/components/AIStudyAssistant"));
+const TasksComponent = lazy(() => import("@/components/TasksComponent"));
 const StudyMaterialsComponent = lazy(() => import("@/components/StudyMaterialsCRUD"));
 
 // Menu configuration
@@ -204,12 +205,12 @@ export default function DashboardPage() {
           const parsedUser = JSON.parse(userData);
           setUser(parsedUser);
         } else {
-          router.push("/auth");
+          router.push("/");
         }
       } catch (err) {
         console.error("Error parsing user data:", err);
         setError("Invalid user session");
-        router.push("/auth");
+        router.push("/");
       } finally {
         setLoading(false);
       }
@@ -233,7 +234,7 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     try {
       authLogout();
-      router.push("/auth");
+      router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
       setError("Logout failed. Please try again.");
@@ -459,16 +460,14 @@ export default function DashboardPage() {
             
             {/* Top Right Actions */}
             <div className="flex items-center space-x-3">
-              {/* Search Button */}
-              <button className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+              {/* <button className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100">
                 <Search size={20} />
               </button>
               
-              {/* Notifications */}
               <button className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 relative">
                 <Bell size={20} />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
+              </button>  */}
               
               {/* Profile Dropdown */}
               <div className="relative">
@@ -492,16 +491,7 @@ export default function DashboardPage() {
                       <p className="text-xs text-gray-500">{user?.email}</p>
                     </div>
                     
-                    <button
-                      onClick={() => {
-                        selectComponent("settings", "Settings");
-                        setProfileDropdownOpen(false);
-                      }}
-                      className="w-full flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors text-left"
-                    >
-                      <Settings size={16} className="mr-3" />
-                      Account Settings
-                    </button>
+                   
                     
                     <div className="border-t border-gray-100 mt-2 pt-2">
                       <button

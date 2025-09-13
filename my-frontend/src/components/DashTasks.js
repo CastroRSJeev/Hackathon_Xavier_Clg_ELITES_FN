@@ -48,7 +48,7 @@ export default function DashTasks() {
             <List className="w-6 h-6 text-yellow-600" />
           </div>
           <div>
-            <p className="text-sm text-gray-500">To Do</p>
+            <p className="text-sm text-gray-500">Pending</p>
             <p className="text-3xl font-semibold text-gray-800">{todoCount}</p>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function DashTasks() {
             <Clock className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <p className="text-sm text-gray-500">In Progress</p>
+            <p className="text-sm text-gray-500">Ongoing</p>
             <p className="text-3xl font-semibold text-gray-800">{inProgressCount}</p>
           </div>
         </div>

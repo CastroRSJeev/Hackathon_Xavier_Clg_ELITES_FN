@@ -99,18 +99,7 @@ export default function AuthPage() {
                 />
               </div>
 
-              <div className="flex items-center border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500">
-                <IdCard className="text-gray-400 w-5 h-5 mr-2" />
-                <input
-                  type="text"
-                  name="id"
-                  placeholder="Student / Employee ID"
-                  value={formData.id}
-                  onChange={handleChange}
-                  className="w-full outline-none"
-                  required
-                />
-              </div>
+              
 
               <div className="flex items-center border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500">
                 <Building className="text-gray-400 w-5 h-5 mr-2" />

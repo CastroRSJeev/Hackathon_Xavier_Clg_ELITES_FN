@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, User, IdCard, Building } from "lucide-react"; // Lucide icons
+import { Mail, Lock, User, IdCard, Building } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,8 +15,8 @@ export default function AuthPage() {
     password: "",
     confirmPassword: "",
   });
-
   const router = useRouter();
+  const { login, signup, loading } = useAuth();
 
   // Handle input change
   const handleChange = (e) => {
@@ -24,25 +25,25 @@ export default function AuthPage() {
   };
 
   // Handle submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isLogin && formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
-      return;
+    let response;
+    if (isLogin) {
+      response = await login(formData.email, formData.password);
+    } else {
+      if (formData.password !== formData.confirmPassword) {
+        alert("Passwords do not match");
+        return;
+      }
+      response = await signup(formData);
     }
 
-    const payload = {
-      type: isLogin ? "login" : "signup",
-      data: formData,
-    };
-
-    console.log("Sending to backend:", payload);
-
-    // Simulate API call
-    setTimeout(() => {
+    if (response.success) {
       router.push("/dashboard");
-    }, 1000);
+    } else {
+      alert(response.error || "Authentication failed");
+    }
   };
 
   return (
@@ -152,8 +153,15 @@ export default function AuthPage() {
           <button
             type="submit"
             className="w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-all"
+            disabled={loading}
           >
-            {isLogin ? "Sign In" : "Sign Up"}
+            {loading
+              ? isLogin
+                ? "Signing In..."
+                : "Signing Up..."
+              : isLogin
+              ? "Sign In"
+              : "Sign Up"}
           </button>
         </form>
 

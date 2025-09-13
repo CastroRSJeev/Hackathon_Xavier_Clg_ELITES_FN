@@ -331,6 +331,7 @@ export default function DashboardPage() {
         {/* Navigation Menu */}
         <nav className="flex-1 px-4 py-6 overflow-y-auto">
           {menuData.map((menu) => {
+            
             const IconComponent = menu.icon;
             const isMenuActive = isActive(menu.component);
 

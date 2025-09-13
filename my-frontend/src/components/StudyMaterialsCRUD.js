@@ -12,7 +12,7 @@ const StudyMaterialsCRUD = () => {
     materialName: '',
     materialDescription: '',
     userId: '68c515c79d7e6426d6777f59',
-    studyMaterialLink: ''
+    studyMaterialDocument: ''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -57,7 +57,7 @@ const StudyMaterialsCRUD = () => {
       }
 
       // Validate URL if provided
-      if (formData.studyMaterialLink && !isValidUrl(formData.studyMaterialLink)) {
+      if (formData.studyMaterialDocument && !isValidUrl(formData.studyMaterialDocument)) {
         setError('Please enter a valid URL');
         return;
       }
@@ -69,7 +69,8 @@ const StudyMaterialsCRUD = () => {
         userId: formData.userId,
         materialName: formData.materialName.trim(),
         materialDescription: formData.materialDescription.trim(),
-        studyMaterialLink: formData.studyMaterialLink.trim() || null
+        studyMaterialDocument:formData.studyMaterialDocument.trim() || null
+
       };
 
       console.log('Request Payload:', payload);
@@ -106,7 +107,7 @@ const StudyMaterialsCRUD = () => {
       }
 
       // Validate URL if provided
-      if (formData.studyMaterialLink && !isValidUrl(formData.studyMaterialLink)) {
+      if (formData.studyMaterialDocument && !isValidUrl(formData.studyMaterialDocument)) {
         setError('Please enter a valid URL');
         return;
       }
@@ -120,7 +121,7 @@ const StudyMaterialsCRUD = () => {
         userId: formData.userId,
         materialName: formData.materialName.trim(),
         materialDescription: formData.materialDescription.trim(),
-        studyMaterialLink: formData.studyMaterialLink.trim() || null
+        studyMaterialDocument: formData.studyMaterialDocument.trim() || null
       };
 
       console.log('Request Payload:', payload);
@@ -181,14 +182,14 @@ const StudyMaterialsCRUD = () => {
         materialName: '', 
         materialDescription: '', 
         userId: '68c515c79d7e6426d6777f59',
-        studyMaterialLink: ''
+        studyMaterialDocument: ''
       });
     } else if (mode === 'edit' && material) {
       setFormData({
         materialName: material.materialName,
         materialDescription: material.materialDescription,
         userId: material.userId,
-        studyMaterialLink: material.studyMaterialLink || ''
+        studyMaterialDocument: material.studyMaterialDocument || ''
       });
     }
     setIsModalOpen(true);
@@ -203,7 +204,7 @@ const StudyMaterialsCRUD = () => {
       materialName: '', 
       materialDescription: '', 
       userId: '68c515c79d7e6426d6777f59',
-      studyMaterialLink: ''
+      studyMaterialDocument: ''
     });
     setError('');
   };
@@ -224,10 +225,10 @@ const StudyMaterialsCRUD = () => {
   const handleOpenLink = (material) => {
     console.log('=== OPEN LINK REQUEST ===');
     console.log('Material:', material);
-    console.log('Link URL:', material.studyMaterialLink);
+    console.log('Link URL:', material.studyMaterialDocument);
     
-    if (material.studyMaterialLink) {
-      window.open(material.studyMaterialLink, '_blank', 'noopener,noreferrer');
+    if (material.studyMaterialDocument) {
+      window.open(material.studyMaterialDocument, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -312,7 +313,7 @@ const StudyMaterialsCRUD = () => {
                   <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">
                     {material.materialName}
                   </h3>
-                  {material.studyMaterialLink && (
+                  {material.studyMaterialDocument && (
                     <div className="flex-shrink-0 ml-2">
                       <Link className="text-blue-600" size={20} />
                     </div>
@@ -353,7 +354,7 @@ const StudyMaterialsCRUD = () => {
                     </button>
                   </div>
 
-                  {material.studyMaterialLink && (
+                  {material.studyMaterialDocument && (
                     <button
                       onClick={() => handleOpenLink(material)}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg flex items-center gap-1 text-sm transition-colors"
@@ -444,17 +445,17 @@ const StudyMaterialsCRUD = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Study Material Link</label>
                     <div className={`p-3 rounded-lg flex items-center justify-between ${
-                      selectedMaterial.studyMaterialLink ? 'bg-green-50 text-green-800' : 'bg-gray-50 text-gray-600'
+                      selectedMaterial.studyMaterialDocument ? 'bg-green-50 text-green-800' : 'bg-gray-50 text-gray-600'
                     }`}>
                       <div className="flex items-center">
                         <Link size={16} className="mr-2" />
-                        {selectedMaterial.studyMaterialLink ? (
-                          <span className="break-all">{selectedMaterial.studyMaterialLink}</span>
+                        {selectedMaterial.studyMaterialDocument ? (
+                          <span className="break-all">{selectedMaterial.studyMaterialDocument}</span>
                         ) : (
                           'No Link Provided'
                         )}
                       </div>
-                      {selectedMaterial.studyMaterialLink && (
+                      {selectedMaterial.studyMaterialDocument && (
                         <button
                           onClick={() => handleOpenLink(selectedMaterial)}
                           className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center gap-1 text-sm ml-2 flex-shrink-0"
@@ -504,8 +505,8 @@ const StudyMaterialsCRUD = () => {
                       <Link className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
                       <input
                         type="url"
-                        value={formData.studyMaterialLink}
-                        onChange={(e) => setFormData({...formData, studyMaterialLink: e.target.value})}
+                        value={formData.studyMaterialDocument}
+                        onChange={(e) => setFormData({...formData, studyMaterialDocument: e.target.value})}
                         className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="https://example.com/document.pdf"
                       />

@@ -33,7 +33,7 @@ export default function DashTasks() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-24">
+      <div className="flex items-center justify-center min-h-24 text-gray-600">
         <Loader className="animate-spin w-6 h-6 mr-2" /> Loading tasks...
       </div>
     );
@@ -42,29 +42,41 @@ export default function DashTasks() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Todo */}
-      <div className="bg-yellow-100 p-6 rounded-xl shadow flex items-center space-x-4">
-        <List className="w-8 h-8 text-yellow-600" />
-        <div>
-          <p className="text-gray-500">To Do</p>
-          <p className="text-2xl font-bold">{todoCount}</p>
+      <div className="p-6 rounded-2xl shadow-sm bg-white border border-gray-100 hover:shadow-md transition">
+        <div className="flex items-center space-x-4">
+          <div className="p-3 rounded-xl bg-yellow-100">
+            <List className="w-6 h-6 text-yellow-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">To Do</p>
+            <p className="text-3xl font-semibold text-gray-800">{todoCount}</p>
+          </div>
         </div>
       </div>
 
       {/* In Progress */}
-      <div className="bg-blue-100 p-6 rounded-xl shadow flex items-center space-x-4">
-        <Clock className="w-8 h-8 text-blue-600" />
-        <div>
-          <p className="text-gray-500">In Progress</p>
-          <p className="text-2xl font-bold">{inProgressCount}</p>
+      <div className="p-6 rounded-2xl shadow-sm bg-white border border-gray-100 hover:shadow-md transition">
+        <div className="flex items-center space-x-4">
+          <div className="p-3 rounded-xl bg-blue-100">
+            <Clock className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">In Progress</p>
+            <p className="text-3xl font-semibold text-gray-800">{inProgressCount}</p>
+          </div>
         </div>
       </div>
 
       {/* Completed */}
-      <div className="bg-green-100 p-6 rounded-xl shadow flex items-center space-x-4">
-        <CheckCircle className="w-8 h-8 text-green-600" />
-        <div>
-          <p className="text-gray-500">Completed</p>
-          <p className="text-2xl font-bold">{completedCount}</p>
+      <div className="p-6 rounded-2xl shadow-sm bg-white border border-gray-100 hover:shadow-md transition">
+        <div className="flex items-center space-x-4">
+          <div className="p-3 rounded-xl bg-green-100">
+            <CheckCircle className="w-6 h-6 text-green-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Completed</p>
+            <p className="text-3xl font-semibold text-gray-800">{completedCount}</p>
+          </div>
         </div>
       </div>
     </div>
